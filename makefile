@@ -1,6 +1,4 @@
-default: main.out
-
-main.out: main.cpp HashTable.cpp
+default: main.cpp HashTable.cpp
     g++ -o main.out main.cpp HashTable.cpp
 
 clean:

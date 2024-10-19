@@ -8,11 +8,11 @@ private:
     int elementCount;
     const float loadFactorThreshold = 0.8;
 
-    int hashFunction(int key) {
+    int hashFunction(int key) const {
         return key % size;
     }
 
-    bool isPrime(int n) {
+    bool isPrime(int n) const {
         if (n <= 1) return false;
         for (int i = 2; i * i <= n; i++) {
             if (n % i == 0) return false;
@@ -20,7 +20,7 @@ private:
         return true;
     }
 
-    int getNextPrime(int start) {
+    int getNextPrime(int start) const {
         while (!isPrime(start)) {
             start++;
         }
@@ -29,29 +29,29 @@ private:
 
     void resizeTable() {
         int newSize = getNextPrime(size * 2);
-        std::vector<int> newTable(newSize, -1); // Create new table
+        std::vector<int> newTable(newSize, -1);
         for (int i = 0; i < size; i++) {
             if (table[i] != -1) {
-                int newHash = table[i] % newSize;
+                int newHash = hashFunction(table[i]);
                 int j = 0;
                 while (newTable[(newHash + j * j) % newSize] != -1) {
                     j++;
                 }
-                newTable[(newHash + j * j) % newSize] = table[i]; // Rehash element
+                newTable[(newHash + j * j) % newSize] = table[i];
             }
         }
-        table = newTable;
+        table = std::move(newTable);
         size = newSize;
     }
 
 public:
-    HashTable(int initialSize) : size(initialSize), elementCount(0) {
-        table.resize(size, -1);  // Initialize the hash table
+    HashTable(int initialSize) : size(getNextPrime(initialSize)), elementCount(0) {
+        table.resize(size, -1);
     }
 
     void insert(int key) {
         if (elementCount >= size * loadFactorThreshold) {
-            resizeTable();  // Resize when load factor exceeds threshold
+            resizeTable();
         }
 
         int hash = hashFunction(key);
@@ -83,14 +83,14 @@ public:
                 elementCount--;
                 return;
             } else if (table[pos] == -1) {
-                break;  // Stop if an empty slot is found
+                break;
             }
             i++;
         }
         std::cout << "Element not found\n";
     }
 
-    int search(int key) {
+    int search(int key) const {
         int hash = hashFunction(key);
         int i = 0;
 
@@ -99,14 +99,14 @@ public:
             if (table[pos] == key) {
                 return pos;
             } else if (table[pos] == -1) {
-                return -1;  // Stop if an empty slot is found
+                return -1;
             }
             i++;
         }
         return -1;
     }
 
-    void printTable() {
+    void printTable() const {
         for (int i = 0; i < size; i++) {
             if (table[i] == -1) {
                 std::cout << "- ";

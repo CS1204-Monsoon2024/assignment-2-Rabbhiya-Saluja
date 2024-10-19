@@ -49,6 +49,40 @@ public:
         table.resize(size, -1);
     }
 
+    // Copy constructor
+    HashTable(const HashTable& other)
+        : table(other.table), size(other.size), elementCount(other.elementCount) {}
+
+    // Move constructor
+    HashTable(HashTable&& other) noexcept
+        : table(std::move(other.table)), size(other.size), elementCount(other.elementCount) {
+        other.size = 0; // Invalidate the other hash table
+        other.elementCount = 0;
+    }
+
+    // Copy assignment operator
+    HashTable& operator=(const HashTable& other) {
+        if (this != &other) {
+            table = other.table;
+            size = other.size;
+            elementCount = other.elementCount;
+        }
+        return *this;
+    }
+
+    // Move assignment operator
+    HashTable& operator=(HashTable&& other) noexcept {
+        if (this != &other) {
+            table = std::move(other.table);
+            size = other.size;
+            elementCount = other.elementCount;
+
+            other.size = 0; // Invalidate the other hash table
+            other.elementCount = 0;
+        }
+        return *this;
+    }
+
     void insert(int key) {
         if (elementCount >= size * loadFactorThreshold) {
             resizeTable();

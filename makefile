@@ -1,7 +1,8 @@
-default: main
+default: main.out
 
-main: main.cpp HashTable.cpp
-	g++ -o main main.cpp HashTable.cpp
+main.out: main.cpp HashTable.cpp
+    g++ -o main.out main.cpp HashTable.cpp
 
 clean:
-	rm -f main
+    rm -f main.out
+

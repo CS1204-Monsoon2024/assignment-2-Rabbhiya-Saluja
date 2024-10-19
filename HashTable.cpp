@@ -30,10 +30,14 @@ private:
     void resizeTable() {
         int newSize = getNextPrime(size * 2);
         std::vector<int> newTable(newSize, -1);
+
+    
         for (int i = 0; i < size; i++) {
             if (table[i] != -1) {
-                int newHash = hashFunction(table[i]);
+                int newHash = table[i] % newSize; // Hash for the new size
                 int j = 0;
+
+            
                 while (newTable[(newHash + j * j) % newSize] != -1) {
                     j++;
                 }
@@ -43,6 +47,7 @@ private:
         table = std::move(newTable);
         size = newSize;
     }
+
 
 public:
     HashTable(int initialSize) : size(getNextPrime(initialSize)), elementCount(0) {

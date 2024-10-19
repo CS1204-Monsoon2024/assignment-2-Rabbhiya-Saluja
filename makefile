@@ -1,6 +1,8 @@
+default: main.out
 
-default: HashTable.cpp
-	# write command to test your files (you do not need it for your submissions)
-	g++ -o HashTable.out HashTable.cpp
+main.out: main.cpp HashTable.cpp
+    g++ -o main.out main.cpp HashTable.cpp
+
 clean:
-	rm *.out
+    rm *.out
+

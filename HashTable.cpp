@@ -1,109 +1,107 @@
-
 #include <iostream>
 #include <vector>
-#include <cmath>
 
 class HashTable {
 private:
     std::vector<int> table;
     int size;
-    int count;
+    int elementCount;
     const float loadFactorThreshold = 0.8;
 
     int hashFunction(int key) {
         return key % size;
     }
 
-    bool isPrime(int num) {
-        if (num <= 1) return false;
-        for (int i = 2; i <= std::sqrt(num); i++) {
-            if (num % i == 0) return false;
+    bool isPrime(int n) {
+        if (n <= 1) return false;
+        for (int i = 2; i * i <= n; i++) {
+            if (n % i == 0) return false;
         }
         return true;
     }
 
-    int nextPrime(int num) {
-        while (!isPrime(num)) {
-            num++;
+    int getNextPrime(int start) {
+        while (!isPrime(start)) {
+            start++;
         }
-        return num;
+        return start;
     }
 
-    void resize() {
-        int newSize = nextPrime(size * 2);
-        std::vector<int> newTable(newSize, -1);
+    void resizeTable() {
+        int newSize = getNextPrime(size * 2);
+        std::vector<int> newTable(newSize, -1); // Create new table
         for (int i = 0; i < size; i++) {
-            if (table[i] != -1 && table[i] != -2) { 
-                int key = table[i];
-                int index = key % newSize;
-                int j = 1;
-                while (newTable[index] != -1) {
-                    index = (key + j * j) % newSize;
+            if (table[i] != -1) {
+                int newHash = table[i] % newSize;
+                int j = 0;
+                while (newTable[(newHash + j * j) % newSize] != -1) {
                     j++;
                 }
-                newTable[index] = key;
+                newTable[(newHash + j * j) % newSize] = table[i]; // Rehash element
             }
         }
-        size = newSize;
         table = newTable;
+        size = newSize;
     }
 
 public:
-    HashTable(int initialSize) {
-        size = initialSize;
-        table.resize(size, -1); 
-        count = 0;
+    HashTable(int initialSize) : size(initialSize), elementCount(0) {
+        table.resize(size, -1);  // Initialize the hash table
     }
 
     void insert(int key) {
-        if (count / (float)size > loadFactorThreshold) {
-            resize();
+        if (elementCount >= size * loadFactorThreshold) {
+            resizeTable();  // Resize when load factor exceeds threshold
         }
 
-        int index = hashFunction(key);
+        int hash = hashFunction(key);
         int i = 0;
-        while (table[index] != -1 && table[index] != -2) { 
-            if (table[index] == key) {
-                std::cout << "Duplicate key insertion is not allowed" << std::endl;
+
+        while (i < size) {
+            int pos = (hash + i * i) % size;
+            if (table[pos] == -1) {
+                table[pos] = key;
+                elementCount++;
+                return;
+            } else if (table[pos] == key) {
+                std::cout << "Duplicate key insertion is not allowed\n";
                 return;
             }
             i++;
-            if (i >= size / 2) {
-                std::cout << "Max probing limit reached!" << std::endl;
-                return;
-            }
-            index = (hashFunction(key) + i * i) % size;
         }
-        table[index] = key;
-        count++;
+        std::cout << "Max probing limit reached!\n";
     }
 
     void remove(int key) {
-        int index = hashFunction(key);
+        int hash = hashFunction(key);
         int i = 0;
-        while (table[index] != -1) {
-            if (table[index] == key) {
-                table[index] = -2; 
-                count--;
+
+        while (i < size) {
+            int pos = (hash + i * i) % size;
+            if (table[pos] == key) {
+                table[pos] = -1;
+                elementCount--;
                 return;
+            } else if (table[pos] == -1) {
+                break;  // Stop if an empty slot is found
             }
             i++;
-            if (i >= size / 2) break;
-            index = (hashFunction(key) + i * i) % size;
         }
-        std::cout << "Element not found" << std::endl;
+        std::cout << "Element not found\n";
     }
 
     int search(int key) {
-        int index = hashFunction(key);
+        int hash = hashFunction(key);
         int i = 0;
-        while (table[index] != -1) {
-            if (table[index] == key) {
-                return index;
+
+        while (i < size) {
+            int pos = (hash + i * i) % size;
+            if (table[pos] == key) {
+                return pos;
+            } else if (table[pos] == -1) {
+                return -1;  // Stop if an empty slot is found
             }
             i++;
-            if (i >= size / 2) break;
-            index = (hashFunction(key) + i * i) % size;
         }
         return -1;
     }
@@ -111,8 +109,6 @@ public:
     void printTable() {
         for (int i = 0; i < size; i++) {
             if (table[i] == -1) {
-                std::cout << "- ";
-            } else if (table[i] == -2) {
                 std::cout << "- ";
             } else {
                 std::cout << table[i] << " ";
